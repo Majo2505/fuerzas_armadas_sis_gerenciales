@@ -1,0 +1,42 @@
+{
+	"name": "DS_tbl_rangos",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "erp_fuerzas_armadas_bolivia_2",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Bronze Origen"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id_rango",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nombre",
+				"type": "nvarchar"
+			},
+			{
+				"name": "categoria",
+				"type": "nvarchar"
+			},
+			{
+				"name": "nivel_jerarquico",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "abreviatura",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "oltp",
+			"table": "tbl_rangos"
+		}
+	}
+}

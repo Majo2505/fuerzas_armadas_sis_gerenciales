@@ -1,0 +1,33 @@
+{
+	"name": "DS_tbl_tipos_movimiento",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "erp_fuerzas_armadas_bolivia_2",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Bronze Origen"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "id_tipo",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "nombre",
+				"type": "varchar"
+			},
+			{
+				"name": "descripcion",
+				"type": "nvarchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "oltp",
+			"table": "tbl_tipos_movimiento"
+		}
+	}
+}
