@@ -123,7 +123,7 @@
 				},
 				{
 					"dataset": {
-						"referenceName": "bronce_tipos_operacion",
+						"referenceName": "bronce_tipos_movimiento",
 						"type": "DatasetReference"
 					},
 					"name": "sink7"
@@ -478,7 +478,7 @@
 				"     input(",
 				"          id_tipo as string,",
 				"          nombre as string,",
-				"          categoria as string",
+				"          descripcion as string",
 				"     ),",
 				"     deletable:false,",
 				"     insertable:true,",
@@ -491,7 +491,7 @@
 				"     mapColumn(",
 				"          id_tipo,",
 				"          nombre,",
-				"          categoria = descripcion",
+				"          descripcion",
 				"     )) ~> sink7",
 				"source8 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
