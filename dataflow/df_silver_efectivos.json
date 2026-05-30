@@ -1,0 +1,141 @@
+{
+	"name": "df_silver_efectivos",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronce_efectivos",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_efectivos",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_efectivo as string,",
+				"          id_especialidad as string,",
+				"          id_unidad_actual as string,",
+				"          id_rango_actual as string,",
+				"          nombre as string,",
+				"          ci as string,",
+				"          fecha_nacimiento as string,",
+				"          genero as string,",
+				"          departamento_origen as string,",
+				"          fecha_ingreso as string,",
+				"          estado as string,",
+				"          salario_mensual as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_efectivo) AS id_efectivo,\\n    TRIM(id_especialidad) AS id_especialidad,\\n    TRIM(id_unidad_actual) AS id_unidad_actual,\\n    TRIM(id_rango_actual) AS id_rango_actual,\\n    TRIM(nombre) AS nombre,\\n    TRIM(ci) AS ci,\\n    TRIM(fecha_nacimiento) AS fecha_nacimiento,\\n    TRIM(genero) AS genero,\\n    TRIM(departamento_origen) AS departamento_origen,\\n    TRIM(fecha_ingreso) AS fecha_ingreso,\\n    TRIM(estado) AS estado,\\n    TRIM(salario_mensual) AS salario_mensual\\nFROM bronze.tbl_efectivos\\nWHERE id_efectivo IS NOT NULL AND TRIM(id_efectivo) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(id_efectivo = toInteger(id_efectivo),",
+				"          id_especialidad = toInteger(id_especialidad),",
+				"          id_unidad_actual = toInteger(id_unidad_actual),",
+				"          id_rango_actual = toInteger(id_rango_actual),",
+				"          genero = case(     \r",
+				"        in(['masculino', 'hombre', 'masc.', 'm', 'masc', 'h'], lower(trim(genero))), 'Masculino',     \r",
+				"        in(['femenino', 'fem', 'f', 'mujer', 'f.', 'fem.'], lower(trim(genero))), 'Femenino',     \r",
+				"        'No Especificado' \r",
+				"    ),",
+				"          estado = iif(isNull(estado) || trim(estado) == '', 'No Especificado', \r",
+				"    case(\r",
+				"        in(['activo', 'activo.', 'act', 'en actividad', 'actv', 'a', 'act.'], lower(trim(estado))), 'Activo',\r",
+				"        in(['baja', 'dado de baja', 'bja', 'baja.', 'b'], lower(trim(estado))), 'Baja',\r",
+				"        in(['reserva', 'en reserva', 'rsv', 'rsv.', 'r'], lower(trim(estado))), 'Reserva',\r",
+				"        'No Especificado'\r",
+				"    )\r",
+				"),",
+				"          fecha_nacimiento = coalesce(     toDate(fecha_nacimiento, 'yyyy/MM/dd'),     toDate(fecha_nacimiento, 'dd/MM/yyyy'),     toDate(fecha_nacimiento, 'dd-MM-yyyy'),     toDate(fecha_nacimiento, 'MM-dd-yyyy'),     toDate(fecha_nacimiento, 'yyyy-MM-dd'),     toDate(fecha_nacimiento, 'yyyyMMdd') ),",
+				"          fecha_ingreso = coalesce(\r",
+				"    toDate(fecha_ingreso, 'yyyy/MM/dd'),\r",
+				"    toDate(fecha_ingreso, 'dd/MM/yyyy'),\r",
+				"    toDate(fecha_ingreso, 'dd-MM-yyyy'),\r",
+				"    toDate(fecha_ingreso, 'MM-dd-yyyy'),\r",
+				"    toDate(fecha_ingreso, 'yyyy-MM-dd'),\r",
+				"    toDate(fecha_ingreso, 'yyyyMMdd')\r",
+				"),",
+				"          salario_mensual = iifNull(toDecimal(regexReplace(replace(toString(salario_mensual), ',', ''), '[^0-9.]', '')), 0.0),",
+				"          nombre = initCap(trim(regexReplace(regexReplace(regexReplace(nombre, '(\\\\\\\\|/)t', ' '), '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' '))),",
+				"          ci = iif(\r",
+				"    isNull(ci) || trim(ci) == '' || length(regexReplace(ci, '[^0-9]', '')) < 4, \r",
+				"    'NO REGISTRADO', \r",
+				"    regexReplace(ci, '[^0-9]', '')\r",
+				"),",
+				"          departamento_origen = iif(isNull(departamento_origen) || trim(departamento_origen) == '', 'No Especificado', \r",
+				"    case(\r",
+				"        in(['la paz', 'la  paz', 'l.p.', 'lapaz', 'lp'], lower(trim(departamento_origen))), 'La Paz',\r",
+				"        in(['cochabamba', 'cbba', 'cbba.'], lower(trim(departamento_origen))), 'Cochabamba',\r",
+				"        in(['santa cruz', 'sta cruz', 'sta. cruz', 'sc', 'scz'], lower(trim(departamento_origen))), 'Santa Cruz',\r",
+				"        in(['potosi', 'potosí', 'pt', 'pt.'], lower(trim(departamento_origen))), 'Potosí',\r",
+				"        in(['chuquisaca', 'chq', 'chq.', 'sucre'], lower(trim(departamento_origen))), 'Chuquisaca',\r",
+				"        in(['tarija', 'tj', 'tj.'], lower(trim(departamento_origen))), 'Tarija',\r",
+				"        in(['oruro', 'or', 'or.'], lower(trim(departamento_origen))), 'Oruro',\r",
+				"        in(['beni', 'bn', 'bn.'], lower(trim(departamento_origen))), 'Beni',\r",
+				"        in(['pando', 'pn', 'pn.'], lower(trim(departamento_origen))), 'Pando',\r",
+				"        'No Especificado'\r",
+				"    )\r",
+				")) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_efectivo as integer,",
+				"          id_especialidad as integer,",
+				"          id_unidad_actual as integer,",
+				"          id_rango_actual as integer,",
+				"          nombre as string,",
+				"          ci as string,",
+				"          fecha_nacimiento as date,",
+				"          genero as string,",
+				"          departamento_origen as string,",
+				"          fecha_ingreso as date,",
+				"          estado as string,",
+				"          salario_mensual as decimal(18,2),",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_efectivo,",
+				"          id_especialidad,",
+				"          id_unidad_actual,",
+				"          id_rango_actual,",
+				"          nombre,",
+				"          ci,",
+				"          fecha_nacimiento,",
+				"          genero,",
+				"          departamento_origen,",
+				"          fecha_ingreso,",
+				"          estado,",
+				"          salario_mensual",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}
