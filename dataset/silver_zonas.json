@@ -42,14 +42,14 @@
 				"type": "varchar"
 			},
 			{
-				"name": "acceso_carretero",
-				"type": "varchar"
-			},
-			{
 				"name": "fecha_carga",
 				"type": "datetime",
 				"precision": 23,
 				"scale": 3
+			},
+			{
+				"name": "acceso_carretero",
+				"type": "bit"
 			}
 		],
 		"typeProperties": {

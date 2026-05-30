@@ -1,0 +1,167 @@
+{
+	"name": "df_silver_catalogos",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronce_especialidades",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronce_zonas",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronce_rangos",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_especialidades",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_zonas",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_especialidad as string,",
+				"          nombre as string,",
+				"          area as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_especialidad) AS id_especialidad,\\n    TRIM(nombre) AS nombre,\\n    TRIM(area) AS area\\nFROM bronze.tbl_especialidades\\nWHERE id_especialidad IS NOT NULL AND TRIM(id_especialidad) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          id_zona as string,",
+				"          nombre as string,",
+				"          departamento as string,",
+				"          frontera_con as string,",
+				"          tipo_terreno as string,",
+				"          altitud_msnm as string,",
+				"          nivel_riesgo as string,",
+				"          acceso_carretero as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_zona) AS id_zona,\\n    TRIM(nombre) AS nombre,\\n    TRIM(departamento) AS departamento,\\n    TRIM(frontera_con) AS frontera_con,\\n    TRIM(tipo_terreno) AS tipo_terreno,\\n    TRIM(altitud_msnm) AS altitud_msnm,\\n    TRIM(nivel_riesgo) AS nivel_riesgo,\\n    TRIM(acceso_carretero) AS acceso_carretero\\nFROM bronze.tbl_zonas\\nWHERE id_zona IS NOT NULL AND TRIM(id_zona) <> \\'\\'',",
+				"     format: 'query') ~> source2",
+				"source(output(",
+				"          id_rango as string,",
+				"          nombre as string,",
+				"          categoria as string,",
+				"          nivel_jerarquico as string,",
+				"          abreviatura as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_rango) AS id_rango,\\n    TRIM(nombre) AS nombre,\\n    TRIM(categoria) AS categoria,\\n    TRIM(nivel_jerarquico) AS nivel_jerarquico,\\n    TRIM(abreviatura) AS abreviatura\\nFROM bronze.tbl_rangos\\nWHERE id_rango IS NOT NULL AND TRIM(id_rango) <> \\'\\';',",
+				"     format: 'query') ~> source3",
+				"source1 derive(id_especialidad = iifNull(toInteger(id_especialidad), 0),",
+				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado',      initCap(trim(regexReplace(regexReplace(regexReplace(nombre, '(\\\\\\\\|/)t', ' '), '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' '))) ),",
+				"          area = iif(isNull(area) || trim(area) == '', 'No Especificado',      case(         in(['combate'], lower(trim(area))), 'Combate',         in(['apoyo_combate', 'apoyo combate'], lower(trim(area))), 'Apoyo Combate',         in(['servicios', 'servicio'], lower(trim(area))), 'Servicios',         in(['tecnica', 'técnica'], lower(trim(area))), 'Técnica',         initCap(regexReplace(trim(replace(area, '_', ' ')), '\\\\s+', ' '))     ) )) ~> derivedColumn1",
+				"source2 derive(id_zona = iifNull(toInteger(id_zona), 0),",
+				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado', regexReplace(trim(nombre), '\\\\s+', ' ')),",
+				"          departamento = iif(isNull(departamento) || trim(departamento) == '', 'No Especificado',      case(         in(['la paz', 'la  paz', 'l.p.', 'lapaz', 'lp'], lower(trim(departamento))), 'La Paz',         in(['cochabamba', 'cbba', 'cbba.'], lower(trim(departamento))), 'Cochabamba',         in(['santa cruz', 'sta cruz', 'sta. cruz', 'sc', 'scz'], lower(trim(departamento))), 'Santa Cruz',         in(['potosi', 'potosí', 'pt', 'pt.'], lower(trim(departamento))), 'Potosí',         in(['chuquisaca', 'chq', 'chq.', 'sucre'], lower(trim(departamento))), 'Chuquisaca',         in(['tarija', 'tj', 'tj.'], lower(trim(departamento))), 'Tarija',         in(['oruro', 'or', 'or.'], lower(trim(departamento))), 'Oruro',         in(['beni', 'bn', 'bn.'], lower(trim(departamento))), 'Beni',         in(['pando', 'pn', 'pn.'], lower(trim(departamento))), 'Pando',         'No Especificado'     ) ),",
+				"          frontera_con = iif(isNull(frontera_con) || trim(frontera_con) == '' || in(['null', 'n/a', 'ninguno', 'no'], lower(trim(frontera_con))), 'Ninguno',      initCap(trim(frontera_con)) ),",
+				"          tipo_terreno = iif(isNull(tipo_terreno) || trim(tipo_terreno) == '', 'No Especificado', initCap(trim(tipo_terreno))),",
+				"          acceso_carretero = case(\r",
+				"    in(['true', '1', 'si', 'sí', 't'], lower(trim(acceso_carretero))), true(),\r",
+				"    in(['false', '0', 'no', 'f'], lower(trim(acceso_carretero))), false()\r",
+				"),",
+				"          altitud_msnm = iifNull(toInteger(altitud_msnm), 0),",
+				"          nivel_riesgo = iif(isNull(nivel_riesgo) || trim(nivel_riesgo) == '', 'No Especificado', initCap(trim(nivel_riesgo)))) ~> derivedColumn2",
+				"source3 derive() ~> derivedColumn3",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_especialidad as integer,",
+				"          nombre as string,",
+				"          area as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_especialidad,",
+				"          nombre,",
+				"          area",
+				"     )) ~> sink1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_zona as integer,",
+				"          nombre as string,",
+				"          departamento as string,",
+				"          frontera_con as string,",
+				"          tipo_terreno as string,",
+				"          altitud_msnm as integer,",
+				"          nivel_riesgo as string,",
+				"          fecha_carga as timestamp,",
+				"          acceso_carretero as boolean",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_zona,",
+				"          nombre,",
+				"          departamento,",
+				"          frontera_con,",
+				"          tipo_terreno,",
+				"          altitud_msnm,",
+				"          nivel_riesgo,",
+				"          acceso_carretero",
+				"     )) ~> sink2"
+			]
+		}
+	}
+}
