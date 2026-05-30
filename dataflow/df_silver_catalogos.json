@@ -27,6 +27,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "source3"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronce_tipos_operacion",
+						"type": "DatasetReference"
+					},
+					"name": "source4"
 				}
 			],
 			"sinks": [
@@ -43,6 +50,20 @@
 						"type": "DatasetReference"
 					},
 					"name": "sink2"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_rangos",
+						"type": "DatasetReference"
+					},
+					"name": "sink3"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_tipos_operacion",
+						"type": "DatasetReference"
+					},
+					"name": "sink4"
 				}
 			],
 			"transformations": [
@@ -54,6 +75,9 @@
 				},
 				{
 					"name": "derivedColumn3"
+				},
+				{
+					"name": "derivedColumn4"
 				}
 			],
 			"scriptLines": [
@@ -92,8 +116,18 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     isolationLevel: 'READ_UNCOMMITTED',",
-				"     query: 'SELECT \\n    TRIM(id_rango) AS id_rango,\\n    TRIM(nombre) AS nombre,\\n    TRIM(categoria) AS categoria,\\n    TRIM(nivel_jerarquico) AS nivel_jerarquico,\\n    TRIM(abreviatura) AS abreviatura\\nFROM bronze.tbl_rangos\\nWHERE id_rango IS NOT NULL AND TRIM(id_rango) <> \\'\\';',",
+				"     query: 'SELECT \\n    TRIM(id_rango) AS id_rango,\\n    TRIM(nombre) AS nombre,\\n    TRIM(categoria) AS categoria,\\n    TRIM(nivel_jerarquico) AS nivel_jerarquico,\\n    TRIM(abreviatura) AS abreviatura\\nFROM bronze.tbl_rangos\\nWHERE id_rango IS NOT NULL AND TRIM(id_rango) <> \\'\\'',",
 				"     format: 'query') ~> source3",
+				"source(output(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          categoria as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_tipo) AS id_tipo,\\n    TRIM(nombre) AS nombre,\\n    TRIM(categoria) AS categoria\\nFROM bronze.tbl_tipos_operacion\\nWHERE id_tipo IS NOT NULL AND TRIM(id_tipo) <> \\'\\'',",
+				"     format: 'query') ~> source4",
 				"source1 derive(id_especialidad = iifNull(toInteger(id_especialidad), 0),",
 				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado',      initCap(trim(regexReplace(regexReplace(regexReplace(nombre, '(\\\\\\\\|/)t', ' '), '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' '))) ),",
 				"          area = iif(isNull(area) || trim(area) == '', 'No Especificado',      case(         in(['combate'], lower(trim(area))), 'Combate',         in(['apoyo_combate', 'apoyo combate'], lower(trim(area))), 'Apoyo Combate',         in(['servicios', 'servicio'], lower(trim(area))), 'Servicios',         in(['tecnica', 'técnica'], lower(trim(area))), 'Técnica',         initCap(regexReplace(trim(replace(area, '_', ' ')), '\\\\s+', ' '))     ) )) ~> derivedColumn1",
@@ -108,7 +142,16 @@
 				"),",
 				"          altitud_msnm = iifNull(toInteger(altitud_msnm), 0),",
 				"          nivel_riesgo = iif(isNull(nivel_riesgo) || trim(nivel_riesgo) == '', 'No Especificado', initCap(trim(nivel_riesgo)))) ~> derivedColumn2",
-				"source3 derive() ~> derivedColumn3",
+				"source3 derive(id_rango = iifNull(toInteger(id_rango), 0),",
+				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado',      initCap(trim(regexReplace(regexReplace(regexReplace(nombre, '(\\\\\\\\|/)t', ' '), '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' '))) ),",
+				"          categoria = iif(isNull(categoria) || trim(categoria) == '', 'No Especificado',      case(         in(['tropa', 'tropas', 'soldado', 'soldados'], lower(trim(categoria))), 'Tropa',         in(['suboficiales', 'suboficial', 'sub of'], lower(trim(categoria))), 'Suboficiales',         in(['of. subalternos', 'of subalternos', 'oficiales subalternos', 'of subalterno', 'of. subalterno'], lower(trim(categoria))), 'Of. Subalternos',         in(['of. superiores', 'of superiores', 'oficiales superiores', 'of superior', 'of. superior'], lower(trim(categoria))), 'Of. Superiores',         in(['of. generales', 'of generales', 'oficiales generales', 'of general', 'of. general'], lower(trim(categoria))), 'Of. Generales',         initCap(trim(regexReplace(regexReplace(categoria, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s.]', ' '), '\\\\s+', ' ')))     ) ),",
+				"          nivel_jerarquico = iifNull(toInteger(regexReplace(toString(nivel_jerarquico), '[^0-9]', '')), 0),",
+				"          abreviatura = iif(isNull(abreviatura) || trim(abreviatura) == '', 'N/E',      initCap(trim(regexReplace(regexReplace(abreviatura, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s.]', ''), '\\\\s+', ' '))) )) ~> derivedColumn3",
+				"source4 derive(id_tipo = iifNull(toInteger(id_tipo), 0),",
+				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado', \r",
+				"    initCap(trim(regexReplace(regexReplace(regexReplace(nombre, '(\\\\\\\\|/)t', ' '), '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' ')))\r",
+				"),",
+				"          categoria = iif(isNull(categoria) || trim(categoria) == '', 'No Especificado',      initCap(trim(replace(categoria, '_', ' '))) )) ~> derivedColumn4",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     input(",
@@ -160,7 +203,53 @@
 				"          altitud_msnm,",
 				"          nivel_riesgo,",
 				"          acceso_carretero",
-				"     )) ~> sink2"
+				"     )) ~> sink2",
+				"derivedColumn3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_rango as integer,",
+				"          nombre as string,",
+				"          categoria as string,",
+				"          nivel_jerarquico as integer,",
+				"          abreviatura as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_rango,",
+				"          nombre,",
+				"          categoria,",
+				"          nivel_jerarquico,",
+				"          abreviatura",
+				"     )) ~> sink3",
+				"derivedColumn4 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_tipo as integer,",
+				"          nombre as string,",
+				"          categoria as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_tipo,",
+				"          nombre,",
+				"          categoria",
+				"     )) ~> sink4"
 			]
 		}
 	}
