@@ -1,0 +1,216 @@
+{
+	"name": "df_silver_catalogos_pt2",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronce_estructura_organizacional",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronce_unidades",
+						"type": "DatasetReference"
+					},
+					"name": "source2"
+				},
+				{
+					"dataset": {
+						"referenceName": "bronce_tipos_movimiento",
+						"type": "DatasetReference"
+					},
+					"name": "source3"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_estructura_organizacional",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_unidades",
+						"type": "DatasetReference"
+					},
+					"name": "sink2"
+				},
+				{
+					"dataset": {
+						"referenceName": "silver_tipos_movimiento",
+						"type": "DatasetReference"
+					},
+					"name": "sink3"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "derivedColumn3"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_estructura as string,",
+				"          id_padre as string,",
+				"          nivel as string,",
+				"          nombre as string,",
+				"          sigla as string,",
+				"          tipo as string,",
+				"          cobertura_departamentos as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_estructura) AS id_estructura,\\n    TRIM(id_padre) AS id_padre,\\n    TRIM(nivel) AS nivel,\\n    TRIM(nombre) AS nombre,\\n    TRIM(sigla) AS sigla,\\n    TRIM(tipo) AS tipo,\\n    TRIM(cobertura_departamentos) AS cobertura_departamentos\\nFROM bronze.tbl_estructura_organizacional\\nWHERE id_estructura IS NOT NULL AND TRIM(id_estructura) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source(output(",
+				"          id_unidad as string,",
+				"          id_brigada as string,",
+				"          nombre as string,",
+				"          codigo as string,",
+				"          ciudad as string,",
+				"          departamento as string,",
+				"          tipo_cuartel as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_unidad) AS id_unidad,\\n    TRIM(id_brigada) AS id_brigada,\\n    TRIM(nombre) AS nombre,\\n    TRIM(codigo) AS codigo,\\n    TRIM(ciudad) AS ciudad,\\n    TRIM(departamento) AS departamento,\\n    TRIM(tipo_cuartel) AS tipo_cuartel\\nFROM bronze.tbl_unidades\\nWHERE id_unidad IS NOT NULL AND TRIM(id_unidad) <> \\'\\'',",
+				"     format: 'query') ~> source2",
+				"source(output(",
+				"          id_tipo as string,",
+				"          nombre as string,",
+				"          descripcion as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_tipo) AS id_tipo,\\n    TRIM(nombre) AS nombre,\\n    TRIM(descripcion) AS descripcion\\nFROM bronze.tbl_tipos_movimiento\\nWHERE id_tipo IS NOT NULL AND TRIM(id_tipo) <> \\'\\'',",
+				"     format: 'query') ~> source3",
+				"source1 derive(id_estructura = iifNull(toInteger(id_estructura), 0),",
+				"          id_padre = toInteger(id_padre),",
+				"          nivel = initCap(trim(nivel)),",
+				"          nombre = replace(\r",
+				"    replace(\r",
+				"        replace(\r",
+				"            replace(\r",
+				"                replace(\r",
+				"                    replace(\r",
+				"                        initCap(trim(regexReplace(regexReplace(nombre, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\\\\s\\\\-]', ' '), '\\\\s+', ' '))),\r",
+				"                    ' Viii', ' VIII'),\r",
+				"                ' Vii', ' VII'),\r",
+				"            ' Vi', ' VI'),\r",
+				"        ' Iv', ' IV'),\r",
+				"    ' Iii', ' III'),\r",
+				"' Ii', ' II'),",
+				"          sigla = iif(isNull(sigla) || trim(sigla) == '', 'N/A',      upper(trim(regexReplace(sigla, '[^a-zA-Z0-9]', ''))) ),",
+				"          tipo = iif(isNull(tipo) || trim(tipo) == '', 'No Especificado', initCap(trim(tipo))),",
+				"          cobertura_departamentos = iif(isNull(cobertura_departamentos) || trim(cobertura_departamentos) == '', 'No Especificado', initCap(trim(regexReplace(cobertura_departamentos, '\\\\s+', ' '))))) ~> derivedColumn1",
+				"source2 derive(id_unidad = iifNull(toInteger(id_unidad), 0),",
+				"          id_brigada = iifNull(toInteger(id_brigada), 0),",
+				"          nombre = iif(isNull(nombre) || trim(nombre) == '', 'No Especificado',      initCap(trim(regexReplace(regexReplace(nombre, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\\\\s\\\\-]', ' '), '\\\\s+', ' '))) ),",
+				"          codigo = iif(isNull(codigo) || trim(codigo) == '', 'N/A',      upper(trim(regexReplace(codigo, '[^a-zA-Z0-9\\\\-]', ''))) ),",
+				"          ciudad = iif(isNull(ciudad) || trim(ciudad) == '', 'No Especificado',      initCap(trim(regexReplace(regexReplace(ciudad, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ' '), '\\\\s+', ' '))) ),",
+				"          departamento = iif(isNull(departamento) || trim(departamento) == '', 'No Especificado',      case(         in(['la paz', 'la  paz', 'l.p.', 'lapaz', 'lp'], lower(trim(departamento))), 'La Paz',         in(['cochabamba', 'cbba', 'cbba.'], lower(trim(departamento))), 'Cochabamba',         in(['santa cruz', 'sta cruz', 'sta. cruz', 'sc', 'scz'], lower(trim(departamento))), 'Santa Cruz',         in(['potosi', 'potosí', 'pt', 'pt.'], lower(trim(departamento))), 'Potosí',         in(['chuquisaca', 'chq', 'chq.', 'sucre'], lower(trim(departamento))), 'Chuquisaca',         in(['tarija', 'tj', 'tj.'], lower(trim(departamento))), 'Tarija',         in(['oruro', 'or', 'or.'], lower(trim(departamento))), 'Oruro',         in(['beni', 'bn', 'bn.'], lower(trim(departamento))), 'Beni',         in(['pando', 'pn', 'pn.'], lower(trim(departamento))), 'Pando',         'No Especificado'     ) ),",
+				"          tipo_cuartel = iif(isNull(tipo_cuartel) || trim(tipo_cuartel) == '', 'No Especificado',      initCap(trim(regexReplace(tipo_cuartel, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ''))) )) ~> derivedColumn2",
+				"source3 derive(id_tipo = iifNull(toInteger(id_tipo), 0),",
+				"          nombre = initCap(trim(regexReplace(nombre, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', ''))),",
+				"          descripcion = iif(isNull(descripcion) || trim(descripcion) == '', 'Sin Descripción', regexReplace(trim(descripcion), '\\\\n|\\\\r', ' '))) ~> derivedColumn3",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_estructura as integer,",
+				"          id_padre as integer,",
+				"          nivel as string,",
+				"          nombre as string,",
+				"          sigla as string,",
+				"          tipo as string,",
+				"          cobertura_departamentos as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_estructura,",
+				"          id_padre,",
+				"          nivel,",
+				"          nombre,",
+				"          sigla,",
+				"          tipo,",
+				"          cobertura_departamentos",
+				"     )) ~> sink1",
+				"derivedColumn2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_unidad as integer,",
+				"          id_brigada as integer,",
+				"          nombre as string,",
+				"          codigo as string,",
+				"          ciudad as string,",
+				"          departamento as string,",
+				"          tipo_cuartel as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_unidad,",
+				"          id_brigada,",
+				"          nombre,",
+				"          codigo,",
+				"          ciudad,",
+				"          departamento,",
+				"          tipo_cuartel",
+				"     )) ~> sink2",
+				"derivedColumn3 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_tipo as integer,",
+				"          nombre as string,",
+				"          descripcion as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_tipo,",
+				"          nombre,",
+				"          descripcion",
+				"     )) ~> sink3"
+			]
+		}
+	}
+}
