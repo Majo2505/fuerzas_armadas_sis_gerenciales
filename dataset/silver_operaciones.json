@@ -37,15 +37,11 @@
 			},
 			{
 				"name": "fecha_inicio",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"type": "date"
 			},
 			{
 				"name": "fecha_fin",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"type": "date"
 			},
 			{
 				"name": "efectivos_desplegados",
@@ -85,7 +81,8 @@
 			},
 			{
 				"name": "incidentes",
-				"type": "varchar"
+				"type": "int",
+				"precision": 10
 			},
 			{
 				"name": "observaciones",

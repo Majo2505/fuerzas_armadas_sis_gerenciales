@@ -15,7 +15,15 @@
 					"name": "source1"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumn1"
@@ -72,7 +80,54 @@
 				"          detenidos = iifNull(toInteger(case(     in(['veinte'], lower(trim(detenidos))), '20',     in(['quince'], lower(trim(detenidos))), '15',     in(['diez'], lower(trim(detenidos))), '10',     in(['ocho'], lower(trim(detenidos))), '8',     in(['cinco'], lower(trim(detenidos))), '5',     in(['tres'], lower(trim(detenidos))), '3',     in(['dos'], lower(trim(detenidos))), '2',     in(['uno', 'un'], lower(trim(detenidos))), '1',     in(['cero', 'ninguno', 'sin detenidos', 'sin dato', 's/d', 'n/d', 'n/a', 'null'], lower(trim(detenidos))), '0',     regexReplace(detenidos, '[^0-9]', '') )), 0),",
 				"          area_km2 = iifNull(toDecimal(regexReplace(regexReplace(lower(area_km2), '(km2|km²|km|aprox\\\\.?|~)', ''), '[^0-9.]', ''), 18, 2), 0.00),",
 				"          incidentes = iifNull(toInteger(case(     in(['cero', 'ninguno', '-', '0 incidentes'], lower(trim(incidentes))), '0',     in(['uno', 'un'], lower(trim(incidentes))), '1',     regexReplace(incidentes, '[^0-9]', '') )), 0),",
-				"          observaciones = iif(isNull(observaciones) || trim(observaciones) == '' || trim(observaciones) == '-', 'Sin Observaciones',      regexReplace(trim(observaciones), '\\\\n|\\\\r', ' ') )) ~> derivedColumn1"
+				"          observaciones = iif(isNull(observaciones) || trim(observaciones) == '' || trim(observaciones) == '-', 'Sin Observaciones',      regexReplace(trim(observaciones), '\\\\n|\\\\r', ' ') )) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_operacion as integer,",
+				"          id_tipo as integer,",
+				"          id_unidad_resp as integer,",
+				"          id_zona as integer,",
+				"          nombre_operacion as string,",
+				"          fecha_inicio as date,",
+				"          fecha_fin as date,",
+				"          efectivos_desplegados as integer,",
+				"          vehiculos_utilizados as integer,",
+				"          duracion_dias as integer,",
+				"          costo_operacion as decimal(18,2),",
+				"          resultado as string,",
+				"          detenidos as integer,",
+				"          area_km2 as decimal(18,2),",
+				"          incidentes as integer,",
+				"          observaciones as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_operacion,",
+				"          id_tipo,",
+				"          id_unidad_resp,",
+				"          id_zona,",
+				"          nombre_operacion,",
+				"          fecha_inicio,",
+				"          fecha_fin,",
+				"          efectivos_desplegados,",
+				"          vehiculos_utilizados,",
+				"          duracion_dias,",
+				"          costo_operacion,",
+				"          resultado,",
+				"          detenidos,",
+				"          area_km2,",
+				"          incidentes,",
+				"          observaciones",
+				"     )) ~> sink1"
 			]
 		}
 	}
