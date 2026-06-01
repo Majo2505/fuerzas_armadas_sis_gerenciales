@@ -1,0 +1,79 @@
+{
+	"name": "df_silver_operaciones",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronce_operaciones",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_operacion as string,",
+				"          id_tipo as string,",
+				"          id_unidad_resp as string,",
+				"          id_zona as string,",
+				"          nombre_operacion as string,",
+				"          fecha_inicio as string,",
+				"          fecha_fin as string,",
+				"          efectivos_desplegados as string,",
+				"          vehiculos_utilizados as string,",
+				"          duracion_dias as string,",
+				"          costo_operacion as string,",
+				"          resultado as string,",
+				"          detenidos as string,",
+				"          area_km2 as string,",
+				"          incidentes as string,",
+				"          observaciones as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_operacion) AS id_operacion,\\n    TRIM(id_tipo) AS id_tipo,\\n    TRIM(id_unidad_resp) AS id_unidad_resp,\\n    TRIM(id_zona) AS id_zona,\\n    TRIM(nombre_operacion) AS nombre_operacion,\\n    TRIM(fecha_inicio) AS fecha_inicio,\\n    TRIM(fecha_fin) AS fecha_fin,\\n    TRIM(efectivos_desplegados) AS efectivos_desplegados,\\n    TRIM(vehiculos_utilizados) AS vehiculos_utilizados,\\n    TRIM(duracion_dias) AS duracion_dias,\\n    TRIM(costo_operacion) AS costo_operacion,\\n    TRIM(resultado) AS resultado,\\n    TRIM(detenidos) AS detenidos,\\n    TRIM(area_km2) AS area_km2,\\n    TRIM(incidentes) AS incidentes,\\n    TRIM(observaciones) AS observaciones\\nFROM bronze.tbl_operaciones\\nWHERE id_operacion IS NOT NULL AND TRIM(id_operacion) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(id_operacion = iifNull(toInteger(id_operacion), 0),",
+				"          id_tipo = iifNull(toInteger(id_tipo), 0),",
+				"          id_unidad_resp = iifNull(toInteger(id_unidad_resp), 0),",
+				"          id_zona = iifNull(toInteger(id_zona), 0),",
+				"          nombre_operacion = iif(isNull(nombre_operacion) || trim(nombre_operacion) == '', 'No Especificado', \r",
+				"    initCap(trim(regexReplace(regexReplace(nombre_operacion, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ0-9\\\\s.#/-]', ' '), '\\\\s+', ' ')))\r",
+				"),",
+				"          fecha_inicio = coalesce(     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy-MM-dd'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy/MM/dd'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd-MM-yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd/MM/yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM-dd-yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM/dd/yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM dd yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_inicio), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyyMMdd'),     toDate(null()) ),",
+				"          fecha_fin = coalesce(\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy-MM-dd'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy/MM/dd'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd-MM-yyyy'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd/MM/yyyy'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM-dd-yyyy'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM/dd/yyyy'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM dd yyyy'),\r",
+				"    toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_fin), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyyMMdd'),\r",
+				"    toDate(null())\r",
+				"),",
+				"          efectivos_desplegados = iifNull(toInteger(case(     in(['cien', 'ciento'], lower(trim(efectivos_desplegados))), '100',     in(['doscientos'], lower(trim(efectivos_desplegados))), '200',     in(['trescientos'], lower(trim(efectivos_desplegados))), '300',     in(['cuatrocientos'], lower(trim(efectivos_desplegados))), '400',     in(['quinientos'], lower(trim(efectivos_desplegados))), '500',     in(['cincuenta'], lower(trim(efectivos_desplegados))), '50',     regexReplace(efectivos_desplegados, '[^0-9]', '') )), 0),",
+				"          vehiculos_utilizados = iifNull(toInteger(case(     in(['cero', 'ninguno', 'sin'], lower(trim(vehiculos_utilizados))), '0',     in(['uno', 'un'], lower(trim(vehiculos_utilizados))), '1',     in(['nueve'], lower(trim(vehiculos_utilizados))), '9',     in(['veinte'], lower(trim(vehiculos_utilizados))), '20',     regexReplace(vehiculos_utilizados, '[^0-9]', '') )), 0),",
+				"          duracion_dias = iifNull(toInteger(regexReplace(duracion_dias, '[^0-9]', '')), 0),",
+				"          costo_operacion = iifNull(toDecimal(regexReplace(regexReplace(replace(lower(costo_operacion), ',', ''), '(bs\\\\.?\\\\-?|usd|\\\\$us|\\\\$|bolivianos)', ''), '[^0-9.]', ''), 18, 2), 0.00),",
+				"          resultado = iif(isNull(resultado) || trim(resultado) == '', 'No Especificado',      case(         in(['exitosa', 'positivo', 'bueno', 'aceptable', 'objetivo cumplido', 'éxito', 'exitoso', 'sí, exitosa', 'logrado', 'favorable', 'operación concluida', 'concluida', 'completada', 'muy bueno', 'satisfactorio'], lower(trim(resultado))), 'Exitoso',         in(['en proceso', 'en curso', 'parcial', 'incompleta', 'parcialmente exitoso'], lower(trim(resultado))), 'En Proceso',         in(['fallida', 'sin éxito', 'no logrado', 'sin resultados concretos'], lower(trim(resultado))), 'Fallido',         in(['no reportado', 's/n', 'por evaluar', '-'], lower(trim(resultado))), 'No Especificado',         initCap(trim(regexReplace(resultado, '[^a-zA-ZáéíóúÁÉÍÓÚñÑ\\\\s]', '')))     ) ),",
+				"          detenidos = iifNull(toInteger(case(     in(['cero', 'ninguno', 'sin detenidos', '-', 'sin'], lower(trim(detenidos))), '0',     in(['uno', 'un'], lower(trim(detenidos))), '1',     regexReplace(detenidos, '[^0-9]', '') )), 0),",
+				"          area_km2 = iifNull(toDecimal(regexReplace(regexReplace(lower(area_km2), '(km2|km²|km|aprox\\\\.?|~)', ''), '[^0-9.]', ''), 18, 2), 0.00),",
+				"          incidentes = iifNull(toInteger(case(     in(['cero', 'ninguno', '-', '0 incidentes'], lower(trim(incidentes))), '0',     in(['uno', 'un'], lower(trim(incidentes))), '1',     regexReplace(incidentes, '[^0-9]', '') )), 0),",
+				"          observaciones = iif(isNull(observaciones) || trim(observaciones) == '' || trim(observaciones) == '-', 'Sin Observaciones',      regexReplace(trim(observaciones), '\\\\n|\\\\r', ' ') )) ~> derivedColumn1"
+			]
+		}
+	}
+}
