@@ -1,0 +1,38 @@
+{
+	"name": "gold_dim_tipo_movimiento",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "dw_fuerzas_armadas_local",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Gold"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "tipo_movimiento_key",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "id_tipo_origen",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "descripcion_movimiento",
+				"type": "varchar"
+			},
+			{
+				"name": "categoria_movimiento",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"schema": "gold",
+			"table": "dim_tipo_movimiento"
+		}
+	}
+}
