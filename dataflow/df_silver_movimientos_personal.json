@@ -1,0 +1,122 @@
+{
+	"name": "df_silver_movimientos_personal",
+	"properties": {
+		"folder": {
+			"name": "Silver"
+		},
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "bronce_movimientos_personal",
+						"type": "DatasetReference"
+					},
+					"name": "source1"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "silver_movimientos_personal",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "derivedColumn1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          id_movimiento as string,",
+				"          id_efectivo as string,",
+				"          id_unidad_destino as string,",
+				"          id_rango as string,",
+				"          id_tipo as string,",
+				"          fecha_movimiento as string,",
+				"          antiguedad_anios as string,",
+				"          salario_mensual as string,",
+				"          observaciones as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     query: 'SELECT \\n    TRIM(id_movimiento) AS id_movimiento,\\n    TRIM(id_efectivo) AS id_efectivo,\\n    TRIM(id_unidad_destino) AS id_unidad_destino,\\n    TRIM(id_rango) AS id_rango,\\n    TRIM(id_tipo) AS id_tipo,\\n    TRIM(fecha_movimiento) AS fecha_movimiento,\\n    TRIM(antiguedad_anios) AS antiguedad_anios,\\n    TRIM(salario_mensual) AS salario_mensual,\\n    TRIM(observaciones) AS observaciones\\nFROM bronze.tbl_movimientos_personal\\nWHERE id_movimiento IS NOT NULL AND TRIM(id_movimiento) <> \\'\\'',",
+				"     format: 'query') ~> source1",
+				"source1 derive(id_movimiento = iifNull(toInteger(id_movimiento), 0),",
+				"          id_efectivo = iifNull(toInteger(id_efectivo), 0),",
+				"          id_unidad_destino = iifNull(toInteger(id_unidad_destino), 0),",
+				"          id_rango = iifNull(toInteger(id_rango), 0),",
+				"          id_tipo = iifNull(toInteger(id_tipo), 0),",
+				"          fecha_movimiento = coalesce(     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy-MM-dd'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyy/MM/dd'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd-MM-yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'dd/MM/yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM-dd-yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM/dd/yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'MM dd yyyy'),     toDate(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(regexReplace(replace(lower(fecha_movimiento), ',', ''), 'diciembre|dic', '12'), 'noviembre|nov', '11'), 'octubre|oct', '10'), 'septiembre|sep', '09'), 'agosto|ago', '08'), 'julio|jul', '07'), 'junio|jun', '06'), 'mayo|may', '05'), 'abril|abr', '04'), 'marzo|mar', '03'), 'febrero|feb', '02'), 'enero|ene', '01'), 'yyyyMMdd'),     toDate(null()) ),",
+				"          antiguedad_anios = iifNull(toInteger(case(\r",
+				"    in(['veinticinco', 'veinticinco años'], lower(trim(antiguedad_anios))), '25',\r",
+				"    in(['veinticuatro', 'veinticuatro años'], lower(trim(antiguedad_anios))), '24',\r",
+				"    in(['veintitrés', 'veintitres', 'veintitrés años', 'veintitres años'], lower(trim(antiguedad_anios))), '23',\r",
+				"    in(['veintidós', 'veintidos', 'veintidós años', 'veintidos años'], lower(trim(antiguedad_anios))), '22',\r",
+				"    in(['veintiuno', 'veintiuno años'], lower(trim(antiguedad_anios))), '21',\r",
+				"    in(['veinte', 'veinte años'], lower(trim(antiguedad_anios))), '20',\r",
+				"    in(['diecinueve', 'diecinueve años'], lower(trim(antiguedad_anios))), '19',\r",
+				"    in(['dieciocho', 'dieciocho años'], lower(trim(antiguedad_anios))), '18',\r",
+				"    in(['diecisiete', 'diecisiete años'], lower(trim(antiguedad_anios))), '17',\r",
+				"    in(['dieciséis', 'dieciseis', 'dieciséis años', 'dieciseis años'], lower(trim(antiguedad_anios))), '16',\r",
+				"    in(['quince', 'quince años'], lower(trim(antiguedad_anios))), '15',\r",
+				"    in(['catorce', 'catorce años'], lower(trim(antiguedad_anios))), '14',\r",
+				"    in(['trece', 'trece años'], lower(trim(antiguedad_anios))), '13',\r",
+				"    in(['doce', 'doce años'], lower(trim(antiguedad_anios))), '12',\r",
+				"    in(['once', 'once años'], lower(trim(antiguedad_anios))), '11',\r",
+				"    in(['diez', 'diez años'], lower(trim(antiguedad_anios))), '10',\r",
+				"    in(['nueve', 'nueve años'], lower(trim(antiguedad_anios))), '9',\r",
+				"    in(['ocho', 'ocho años'], lower(trim(antiguedad_anios))), '8',\r",
+				"    in(['siete', 'siete años'], lower(trim(antiguedad_anios))), '7',\r",
+				"    in(['seis', 'seis años'], lower(trim(antiguedad_anios))), '6',\r",
+				"    in(['cinco', 'cinco años'], lower(trim(antiguedad_anios))), '5',\r",
+				"    in(['cuatro', 'cuatro años'], lower(trim(antiguedad_anios))), '4',\r",
+				"    in(['tres', 'tres años'], lower(trim(antiguedad_anios))), '3',\r",
+				"    in(['dos', 'dos años'], lower(trim(antiguedad_anios))), '2',\r",
+				"    in(['uno', 'uno años', 'un año'], lower(trim(antiguedad_anios))), '1',\r",
+				"    in(['cero', 'cero años', 'cero a.'], lower(trim(antiguedad_anios))), '0',\r",
+				"    regexReplace(regexReplace(replace(lower(trim(antiguedad_anios)), ',', '.'), '\\\\.[0-9]+', ''), '[^0-9]', '')\r",
+				")), 0),",
+				"          salario_mensual = iifNull(toDecimal(     case(         regexMatch(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), '.*,[0-9]{1,2}$'),              replace(replace(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), '.', ''), ',', '.'),         replace(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), ',', '')     ), 18, 2 ), 0.00),",
+				"          observaciones = iif(isNull(observaciones) || trim(observaciones) == '' || in(['s/n', 'n/a', 'nd'], lower(trim(observaciones))), 'Sin Observaciones',      initCap(regexReplace(trim(observaciones), '\\\\n|\\\\r', ' ')) )) ~> derivedColumn1",
+				"derivedColumn1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          id_movimiento as integer,",
+				"          id_efectivo as integer,",
+				"          id_unidad_destino as integer,",
+				"          id_rango as integer,",
+				"          id_tipo as integer,",
+				"          fecha_movimiento as date,",
+				"          antiguedad_anios as integer,",
+				"          salario_mensual as decimal(18,2),",
+				"          observaciones as string,",
+				"          fecha_carga as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          id_movimiento,",
+				"          id_efectivo,",
+				"          id_unidad_destino,",
+				"          id_rango,",
+				"          id_tipo,",
+				"          fecha_movimiento,",
+				"          antiguedad_anios,",
+				"          salario_mensual,",
+				"          observaciones",
+				"     )) ~> sink1"
+			]
+		}
+	}
+}

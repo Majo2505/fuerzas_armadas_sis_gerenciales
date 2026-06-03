@@ -38,9 +38,7 @@
 			},
 			{
 				"name": "fecha_movimiento",
-				"type": "datetime",
-				"precision": 23,
-				"scale": 3
+				"type": "date"
 			},
 			{
 				"name": "antiguedad_anios",
