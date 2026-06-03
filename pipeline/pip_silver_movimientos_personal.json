@@ -1,5 +1,5 @@
 {
-	"name": "pip_sul",
+	"name": "pip_silver_movimientos_personal",
 	"properties": {
 		"activities": [
 			{
@@ -15,6 +15,10 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
+					"dataflow": {
+						"referenceName": "df_silver_movimientos_personal",
+						"type": "DataFlowReference"
+					},
 					"compute": {
 						"coreCount": 8,
 						"computeType": "General"

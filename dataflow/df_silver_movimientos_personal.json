@@ -81,7 +81,7 @@
 				"    in(['cero', 'cero años', 'cero a.'], lower(trim(antiguedad_anios))), '0',\r",
 				"    regexReplace(regexReplace(replace(lower(trim(antiguedad_anios)), ',', '.'), '\\\\.[0-9]+', ''), '[^0-9]', '')\r",
 				")), 0),",
-				"          salario_mensual = iifNull(toDecimal(     case(         regexMatch(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), '.*,[0-9]{1,2}$'),              replace(replace(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), '.', ''), ',', '.'),         replace(regexReplace(lower(salario_mensual), '[^0-9.,]', ''), ',', '')     ), 18, 2 ), 0.00),",
+				"          salario_mensual = iifNull(toDecimal(     case(         regexMatch(regexReplace(regexReplace(lower(salario_mensual), '(bs\\\\.?\\\\-?|usd|\\\\$us|\\\\$|bolivianos)', ''), '[^0-9.,]', ''), '.*,[0-9]{1,2}$'),              replace(replace(regexReplace(regexReplace(lower(salario_mensual), '(bs\\\\.?\\\\-?|usd|\\\\$us|\\\\$|bolivianos)', ''), '[^0-9.,]', ''), '.', ''), ',', '.'),         replace(regexReplace(regexReplace(lower(salario_mensual), '(bs\\\\.?\\\\-?|usd|\\\\$us|\\\\$|bolivianos)', ''), '[^0-9.,]', ''), ',', '')     ), 18, 2 ), 0.00),",
 				"          observaciones = iif(isNull(observaciones) || trim(observaciones) == '' || in(['s/n', 'n/a', 'nd'], lower(trim(observaciones))), 'Sin Observaciones',      initCap(regexReplace(trim(observaciones), '\\\\n|\\\\r', ' ')) )) ~> derivedColumn1",
 				"derivedColumn1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
